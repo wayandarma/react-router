@@ -17,7 +17,6 @@ const Users = () => {
   }, []);
   return (
     <div style={{ marginTop: "50px" }}>
-      {" "}
       <div className="users-cont">
         {gitUsers.map((user) => (
           <div className="user-card-cont" key={user.id}>
