@@ -1,27 +1,23 @@
 // IMPROTANT IMPORT
 import "./App.css";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
-import { useState, Suspense } from "react";
+import { Suspense, useRef } from "react";
 import { SwitchTransition, CSSTransition } from "react-transition-group";
 import { appRoutes } from "./routes";
-
-// COMPONENT
-import Home from "./components/home";
-
+import { useSelector } from "react-redux";
 function App() {
-  const [username, setUsername] = useState("");
-  const [isLogged, setIsLogged] = useState(false);
-
+  const { isLogged } = useSelector((state) => state.auth);
+  const nodeRef = useRef(null);
   // ROUTER STATE
   const location = useLocation();
   return (
     <div className="App">
       <SwitchTransition component={null}>
         <CSSTransition
-          key={location.pathname}
-          classNames={"fade"}
+          nodeRef={nodeRef}
+          in={true}
           timeout={300}
-          unmountOnExit
+          classNames="fade"
         >
           <Suspense fallback={<h1>Loading...</h1>}>
             <Routes location={location}>
@@ -40,13 +36,7 @@ function App() {
                   <Route
                     key={route.path}
                     path={route.path}
-                    element={
-                      <route.component
-                        setIsLogged={setIsLogged}
-                        username={username}
-                        setUsername={setUsername}
-                      />
-                    }
+                    element={<route.component />}
                   />
                 );
               })}

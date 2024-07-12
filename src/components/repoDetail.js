@@ -2,23 +2,17 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
+import { fetchRepoDetails } from "../features/repos/gitReposSlice";
+import { useSelector, useDispatch } from "react-redux";
 const RepoDetail = () => {
-  const [gitRepoData, setGitRepoData] = useState();
+  const dispatch = useDispatch();
+  const gitRepoData = useSelector((state) => state.gitRepos.data);
   const [cloneCopy, setCloneCopy] = useState(false);
   const { name, username } = useParams();
 
   useEffect(() => {
-    const getGitUser = async () => {
-      const response = await axios.get(
-        `https://api.github.com/repos/${username}/${name}`
-      );
-      console.log("USER IS HERE", response.data);
-      setGitRepoData(response.data);
-      return response.data;
-    };
-    getGitUser().catch((e) => console.error(e));
-  }, [username, name]);
+    dispatch(fetchRepoDetails({ name, username }));
+  }, [dispatch, name, username]);
   return (
     <div>
       <div className="top-cont">
@@ -73,7 +67,7 @@ const RepoDetail = () => {
             </div>
           </>
         ) : (
-          <h1>Loadin...</h1>
+          <h1>Loading...</h1>
         )}
       </div>
     </div>

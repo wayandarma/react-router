@@ -1,31 +1,32 @@
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setUsername,
+  setPassword,
+  setErrorMsg,
+  login,
+} from "../features/auth/authSlice";
+import { useEffect } from "react";
+import "./styles.css";
 
-const Login = ({ setIsLogged, setUsername }) => {
-  const [loginUsername, setLoginUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-
-  //NAVIGATION
+const Login = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { username, password, errorMsg, isLogged } = useSelector(
+    (state) => state.auth
+  );
 
-  const dummyUserObject = {
-    username: "wayandarma",
-    password: "12345",
-  };
   const handleLogin = (e) => {
     e.preventDefault();
-    if (
-      loginUsername === dummyUserObject.username &&
-      password === dummyUserObject.password
-    ) {
-      setUsername(loginUsername);
-      setIsLogged(true);
-      navigate("/authProfile");
-    } else {
-      setErrorMsg("Invalid Credentials");
-    }
+    dispatch(login({ username, password }));
   };
+
+  useEffect(() => {
+    if (isLogged) {
+      navigate("/authProfile");
+    }
+  }, [isLogged, navigate]);
+
   return (
     <form className="login-form" onSubmit={handleLogin}>
       <span className="error-span">{errorMsg}</span>
@@ -35,10 +36,10 @@ const Login = ({ setIsLogged, setUsername }) => {
       <input
         type="text"
         name="username"
-        value={loginUsername}
+        value={username}
         onChange={(e) => {
-          setLoginUsername(e.target.value);
-          setErrorMsg("");
+          dispatch(setUsername(e.target.value));
+          dispatch(setErrorMsg(""));
         }}
         className="login-inp"
         placeholder="username"
@@ -52,8 +53,8 @@ const Login = ({ setIsLogged, setUsername }) => {
         value={password}
         className="login-inp"
         onChange={(e) => {
-          setPassword(e.target.value);
-          setErrorMsg("");
+          dispatch(setPassword(e.target.value));
+          dispatch(setErrorMsg(""));
         }}
         placeholder="password"
       />

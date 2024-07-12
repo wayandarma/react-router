@@ -1,21 +1,23 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./styles.css";
-
+import { useDispatch, useSelector } from "react-redux";
+import { fetchGitRepos } from "../features/repos/gitReposSlice";
 const RepoList = () => {
   //State management
-  const [repos, setRepos] = useState(null);
-  const gitRepos = async () => {
-    const response = await axios.get(
-      "https://api.github.com/search/repositories?q=XXX"
-    );
-    console.log(response.data.items);
-    setRepos(response.data.items);
-    return response.data;
-  };
+  const dispatch = useDispatch();
+  const repos = useSelector((state) => state.gitRepos.data);
+  const status = useSelector((state) => state.gitRepos.status);
   useEffect(() => {
-    gitRepos().catch((e) => console.error(e));
-  }, []);
+    dispatch(fetchGitRepos());
+  }, [dispatch]);
+
+  if (status === "loading") {
+    return <h1>Loading...</h1>;
+  }
+
+  if (status === "failed") {
+    return <h1>Error loading repositories</h1>;
+  }
   return (
     <div className="users-cont">
       {repos ? (

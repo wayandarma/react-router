@@ -1,54 +1,65 @@
-// IMPORATNT IMPORT
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./styles.css";
 import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchGitUser } from "../features/users/gitUserSlice";
+
 const UserProfile = () => {
-  const [gitUserData, setGitUserData] = useState({});
   const { username } = useParams();
+  const dispatch = useDispatch();
+
+  const gitUserData = useSelector((state) => state.gitUser.data);
+  const status = useSelector((state) => state.gitUser.status);
+  const error = useSelector((state) => state.gitUser.error);
+
   useEffect(() => {
-    const getGitUser = async () => {
-      const response = await axios.get(
-        `https://api.github.com/users/${username}`
-      );
-      console.log("USER IS HERE", response.data);
-      setGitUserData(response.data);
-      return response.data;
-    };
-    getGitUser().catch((e) => console.error(e));
-  }, []);
+    if (username) {
+      dispatch(fetchGitUser(username));
+    }
+  }, [dispatch, username]);
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  if (status === "failed") {
+    return <div>Error: {error}</div>;
+  }
+
   return (
-    <div className="user-profile-main-cont">
-      <div className="top-cont">
-        <img
-          src={gitUserData.avatar_url}
-          className="user-avatar-img"
-          alt="user-img"
-        />{" "}
-        <div className="name-cont">
-          <span>{gitUserData.login}</span>
-          <h2>{gitUserData.name}</h2>
-          <h3>{gitUserData.location}</h3>
-          <div className="follow-cont">
-            <span className="followers">
-              Followers: {gitUserData.followers}
-            </span>
-            <span>Following: {gitUserData.following}</span>
+    gitUserData && (
+      <div className="user-profile-main-cont">
+        <div className="top-cont">
+          <img
+            src={gitUserData.avatar_url}
+            className="user-avatar-img"
+            alt="user-img"
+          />
+          <div className="name-cont">
+            <span>{gitUserData.login}</span>
+            <h2>{gitUserData.name}</h2>
+            <h3>{gitUserData.location}</h3>
+            <div className="follow-cont">
+              <span className="followers">
+                Followers: {gitUserData.followers}
+              </span>
+              <span>Following: {gitUserData.following}</span>
+            </div>
+            <a
+              className="view-ongit-a"
+              href={gitUserData.html_url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View on GitHub
+            </a>
           </div>
-          <a
-            className="view-ongit-a"
-            href={gitUserData.html_url}
-            target="_blank"
-            rel="noreferrer"
-          >
-            View on GitHub
-          </a>
+        </div>
+        <div className="bottom-cont">
+          <h3>{gitUserData.bio}</h3>
         </div>
       </div>
-      <div className="bottom-cont">
-        <h3>{gitUserData.bio}</h3>
-      </div>
-    </div>
+    )
   );
 };
 

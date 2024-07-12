@@ -1,20 +1,32 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchGitUser } from "../features/users/gitUserSlice";
 
-const AuthProfile = ({ username }) => {
-  const [gitUserData, setGitUserData] = useState({});
+const AuthProfile = () => {
+  const dispatch = useDispatch();
+  const username = useSelector((state) => state.auth.username);
+  const gitUserData = useSelector((state) => state.gitUser.data);
+  const status = useSelector((state) => state.gitUser.status);
+  const error = useSelector((state) => state.gitUser.error);
 
   useEffect(() => {
-    const getGitUser = async () => {
-      const response = await axios.get(
-        `https://api.github.com/users/${username}`
-      );
-      console.log("USER IS HERE", response.data);
-      setGitUserData(response.data);
-      return response.data;
-    };
-    getGitUser().catch((e) => console.error(e));
-  }, []);
+    if (username) {
+      dispatch(fetchGitUser(username));
+    }
+  }, [dispatch, username]);
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  if (status === "failed") {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!gitUserData) {
+    return <div>No user data available.</div>;
+  }
+
   return (
     <div className="user-profile-main-cont">
       <h2 style={{ marginTop: "40px", marginBottom: "20px" }}>YOUR PROFILE</h2>
@@ -23,7 +35,7 @@ const AuthProfile = ({ username }) => {
           src={gitUserData.avatar_url}
           className="user-avatar-img"
           alt="user-img"
-        />{" "}
+        />
         <div className="name-cont">
           <span>{gitUserData.login}</span>
           <h2>{gitUserData.name}</h2>
